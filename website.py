@@ -117,7 +117,6 @@ elif tabs == "📰 Fake News Detector":
     user_input = None
     if option == "Text":
         user_input = st.text_area("Enter news text here...")
-        st.write(user_input)
     elif option == "URL":
         url_input = st.text_input("Enter the URL of the news article:")
         if st.button("Extract Text"):
