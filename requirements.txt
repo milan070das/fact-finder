@@ -8,6 +8,7 @@ google-auth
 pyttsx3
 speechrecognition
 newspaper3k
+unstructured
 
 langchain
 langchain-community
