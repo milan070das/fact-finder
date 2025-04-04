@@ -233,5 +233,8 @@ elif tabs == "👨‍💻 Developed By":
     image = Image.open("qr.jpg")
     image = image.resize((200, 200))
     st.image(image)
-    if st.button("Feedback Form"):
-        webbrowser.open('https://forms.gle/XMk5oLhjoAgXoFPT9')
+    # if st.button("Feedback Form"):
+    #     webbrowser.open('https://forms.gle/XMk5oLhjoAgXoFPT9')
+    if st.button("Feedback"):
+        st.write("[Fill Feedback Form](https://your-google-form-url)")
+
