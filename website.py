@@ -236,5 +236,5 @@ elif tabs == "👨‍💻 Developed By":
     # if st.button("Feedback Form"):
     #     webbrowser.open('https://forms.gle/XMk5oLhjoAgXoFPT9')
     if st.button("Feedback"):
-        st.write("[Fill Feedback Form](https://your-google-form-url)")
+        st.write("[Fill Feedback Form](https://forms.gle/XMk5oLhjoAgXoFPT9)")
 
