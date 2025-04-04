@@ -19,6 +19,9 @@ from langchain.chains import RetrievalQAWithSourcesChain
 from PIL import Image
 from newspaper import Article
 import platform
+import nltk
+
+nltk.download('stopwords')
 
 # Set up Streamlit page configuration at the very beginning
 st.set_page_config(page_title="Fact Finder", layout="wide")
