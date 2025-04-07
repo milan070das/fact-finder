@@ -207,70 +207,133 @@ elif tabs == "🧠 News Research":
 #         response = ai_response(query)
 #         st.success(f"🤖 {response}")
 # AI Assistant (Newzie)
+# elif tabs == "🤖 Newzie":
+#     from streamlit_webrtc import webrtc_streamer
+#     import av
+#     import speech_recognition as sr
+#     import queue
+
+#     st.title("🤖 Hello! I am Newzie, how can I help you today?")
+#     st.write('⭐Important Instruction: Please provide sensible questions relevant to the topic. Please refrain from asking irrelevant questions.')
+
+#     # Basic text input
+#     query = st.text_input("Enter your query:", placeholder="Ask me anything!")
+
+#     # Voice input using streamlit-webrtc
+#     st.markdown("---")
+#     st.subheader("🎤 Or, use your voice to ask:")
+
+#     webrtc_ctx = webrtc_streamer(
+#         key="speech-to-text",
+#         mode="sendonly",
+#         audio_receiver_size=1024,
+#         media_stream_constraints={"audio": True, "video": False},
+#         async_processing=True,
+#     )
+
+#     if "transcript" not in st.session_state:
+#         st.session_state.transcript = ""
+
+#     if webrtc_ctx.audio_receiver:
+#         try:
+#             audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=3)
+#             audio_data = b''.join([f.to_ndarray().tobytes() for f in audio_frames])
+#             recognizer = sr.Recognizer()
+#             audio = sr.AudioData(audio_data, 16000, 2)
+#             transcript = recognizer.recognize_google(audio)
+#             st.session_state.transcript = transcript
+#             st.write(f"**You said:** {transcript}")
+#             query = transcript  # Overwrite text input if voice used
+#         except Exception as e:
+#             st.warning("Listening... Speak clearly into your mic.")
+#             st.caption(f"(If there's an issue: {e})")
+
+#     # Respond
+#     if query:
+#         if "the time" in query.lower():
+#             strfTime = datetime.now().strftime("%H:%M:%S")
+#             today = datetime.now()
+#             formatted_date = today.strftime('%B %#d, %Y') if platform.system() == 'Windows' else today.strftime('%B %-d, %Y')
+#             st.write("🕒 Time:", strfTime)
+#             st.write("📅 Date:", formatted_date)
+#         else:
+#             response = ai_response(query)
+#             st.success(f"🤖 {response}")
+# # FAQ Section
+# elif tabs == "❓ FAQ":
+#     st.title("❓ Frequently Asked Questions")
+#     st.write("Here are some common questions about our AI-powered application:")
+#     st.markdown("""
+#     - **What is this app for?**
+#       - This app provides tools for detecting fake news, researching news topics using AI, and interacting with an AI assistant.
+#     - **How does the Fake News Detector work?**
+#       - It uses a machine learning model trained to classify news as real or fake.
+#     - **Can I use voice input for the AI Assistant?**
+#       - Yes! Just click on the "🎤 Use Voice Input" button.
+#     """)
+# AI Assistant (Newzie)
 elif tabs == "🤖 Newzie":
-    from streamlit_webrtc import webrtc_streamer
-    import av
-    import speech_recognition as sr
     import queue
+    import numpy as np
+    from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
+    import speech_recognition as sr
 
     st.title("🤖 Hello! I am Newzie, how can I help you today?")
     st.write('⭐Important Instruction: Please provide sensible questions relevant to the topic. Please refrain from asking irrelevant questions.')
 
-    # Basic text input
     query = st.text_input("Enter your query:", placeholder="Ask me anything!")
 
-    # Voice input using streamlit-webrtc
-    st.markdown("---")
-    st.subheader("🎤 Or, use your voice to ask:")
+    # Streamlit-WebRTC AudioProcessor
+    class AudioProcessor(AudioProcessorBase):
+        def __init__(self) -> None:
+            self.buffer = queue.Queue()
 
-    webrtc_ctx = webrtc_streamer(
-        key="speech-to-text",
+        def recv(self, frame):
+            audio = frame.to_ndarray()
+            self.buffer.put(audio)
+            return frame
+
+    # Start webrtc streamer
+    ctx = webrtc_streamer(
+        key="voice",
         mode="sendonly",
-        audio_receiver_size=1024,
+        audio_processor_factory=AudioProcessor,
         media_stream_constraints={"audio": True, "video": False},
         async_processing=True,
     )
 
-    if "transcript" not in st.session_state:
-        st.session_state.transcript = ""
+    if ctx.audio_processor:
+        audio_buffer = []
+        while not ctx.audio_processor.buffer.empty():
+            audio_buffer.append(ctx.audio_processor.buffer.get())
 
-    if webrtc_ctx.audio_receiver:
-        try:
-            audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=3)
-            audio_data = b''.join([f.to_ndarray().tobytes() for f in audio_frames])
+        if audio_buffer:
+            audio_np = np.concatenate(audio_buffer, axis=0).astype(np.int16)
+            audio_bytes = audio_np.tobytes()
+
             recognizer = sr.Recognizer()
-            audio = sr.AudioData(audio_data, 16000, 2)
-            transcript = recognizer.recognize_google(audio)
-            st.session_state.transcript = transcript
-            st.write(f"**You said:** {transcript}")
-            query = transcript  # Overwrite text input if voice used
-        except Exception as e:
-            st.warning("Listening... Speak clearly into your mic.")
-            st.caption(f"(If there's an issue: {e})")
+            audio_data = sr.AudioData(audio_bytes, sample_rate=48000, sample_width=2)
 
-    # Respond
+            try:
+                transcript = recognizer.recognize_google(audio_data)
+                st.success(f"🗣️ You said: **{transcript}**")
+                query = transcript  # override query with voice input
+            except sr.UnknownValueError:
+                st.warning("Sorry, I couldn't understand that.")
+            except sr.RequestError as e:
+                st.error(f"Could not request results; {e}")
+
+    # Respond to text or voice query
     if query:
         if "the time" in query.lower():
             strfTime = datetime.now().strftime("%H:%M:%S")
             today = datetime.now()
-            formatted_date = today.strftime('%B %#d, %Y') if platform.system() == 'Windows' else today.strftime('%B %-d, %Y')
+            formatted_date = today.strftime('%B %-d, %Y') if platform.system() != 'Windows' else today.strftime('%B %#d, %Y')
             st.write("🕒 Time:", strfTime)
             st.write("📅 Date:", formatted_date)
         else:
             response = ai_response(query)
             st.success(f"🤖 {response}")
-# FAQ Section
-elif tabs == "❓ FAQ":
-    st.title("❓ Frequently Asked Questions")
-    st.write("Here are some common questions about our AI-powered application:")
-    st.markdown("""
-    - **What is this app for?**
-      - This app provides tools for detecting fake news, researching news topics using AI, and interacting with an AI assistant.
-    - **How does the Fake News Detector work?**
-      - It uses a machine learning model trained to classify news as real or fake.
-    - **Can I use voice input for the AI Assistant?**
-      - Yes! Just click on the "🎤 Use Voice Input" button.
-    """)
 
 # Developed By Section
 elif tabs == "👨‍💻 Developed By":
