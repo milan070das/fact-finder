@@ -20,9 +20,6 @@ from PIL import Image
 from newspaper import Article
 import platform
 import nltk
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase
-import av
-import queue
 
 nltk.download('stopwords')
 
@@ -189,89 +186,24 @@ elif tabs == "🧠 News Research":
         st.success(f"Answer: {response['answer']}")
 
 # AI Assistant
-# elif tabs == "🤖 Newzie":
-#     st.title("🤖 Hello! I am Newzie, how can I help you today? ")
-#     query = st.text_input("Enter your query:", placeholder="Ask me anything!")
-#     st.write('⭐Important Instruction: Please provide sensible questions relevant to the topic. Please refrain from asking irrelevant questions.')
-#     use_voice = st.button("🎤 Use Voice Input")
-#     if use_voice:
-#         query = take_command()
-#         st.write(f"**You said:** {query}")
-#     if "the time" in query:
-#         strfTime = datetime.now().strftime("%H:%M:%S")
-#         st.write('Time: ',strfTime)
-#         today = datetime.now()
-#         formatted_date = today.strftime('%B %#d / %Y')
-#         st.write('Date: ',formatted_date)
-#     elif query:
-#         response = ai_response(query)
-#         st.success(f"🤖 {response}")
-# AI Assistant (Newzie)
-# elif tabs == "🤖 Newzie":
-#     from streamlit_webrtc import webrtc_streamer
-#     import av
-#     import speech_recognition as sr
-#     import queue
+elif tabs == "🤖 Newzie":
+    st.title("🤖 Hello! I am Newzie, how can I help you today? ")
+    query = st.text_input("Enter your query:", placeholder="Ask me anything!")
+    st.write('⭐Important Instruction: Please provide sensible questions relevant to the topic. Please refrain from asking irrelevant questions.')
+    use_voice = st.button("🎤 Use Voice Input")
+    if use_voice:
+        query = take_command()
+        st.write(f"**You said:** {query}")
+    if "the time" in query:
+        strfTime = datetime.now().strftime("%H:%M:%S")
+        st.write('Time: ',strfTime)
+        today = datetime.now()
+        formatted_date = today.strftime('%B %#d / %Y')
+        st.write('Date: ',formatted_date)
+    elif query:
+        response = ai_response(query)
+        st.success(f"🤖 {response}")
 
-#     st.title("🤖 Hello! I am Newzie, how can I help you today?")
-#     st.write('⭐Important Instruction: Please provide sensible questions relevant to the topic. Please refrain from asking irrelevant questions.')
-
-#     # Basic text input
-#     query = st.text_input("Enter your query:", placeholder="Ask me anything!")
-
-#     # Voice input using streamlit-webrtc
-#     st.markdown("---")
-#     st.subheader("🎤 Or, use your voice to ask:")
-
-#     webrtc_ctx = webrtc_streamer(
-#         key="speech-to-text",
-#         mode="sendonly",
-#         audio_receiver_size=1024,
-#         media_stream_constraints={"audio": True, "video": False},
-#         async_processing=True,
-#     )
-
-#     if "transcript" not in st.session_state:
-#         st.session_state.transcript = ""
-
-#     if webrtc_ctx.audio_receiver:
-#         try:
-#             audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=3)
-#             audio_data = b''.join([f.to_ndarray().tobytes() for f in audio_frames])
-#             recognizer = sr.Recognizer()
-#             audio = sr.AudioData(audio_data, 16000, 2)
-#             transcript = recognizer.recognize_google(audio)
-#             st.session_state.transcript = transcript
-#             st.write(f"**You said:** {transcript}")
-#             query = transcript  # Overwrite text input if voice used
-#         except Exception as e:
-#             st.warning("Listening... Speak clearly into your mic.")
-#             st.caption(f"(If there's an issue: {e})")
-
-#     # Respond
-#     if query:
-#         if "the time" in query.lower():
-#             strfTime = datetime.now().strftime("%H:%M:%S")
-#             today = datetime.now()
-#             formatted_date = today.strftime('%B %#d, %Y') if platform.system() == 'Windows' else today.strftime('%B %-d, %Y')
-#             st.write("🕒 Time:", strfTime)
-#             st.write("📅 Date:", formatted_date)
-#         else:
-#             response = ai_response(query)
-#             st.success(f"🤖 {response}")
-# # FAQ Section
-# elif tabs == "❓ FAQ":
-#     st.title("❓ Frequently Asked Questions")
-#     st.write("Here are some common questions about our AI-powered application:")
-#     st.markdown("""
-#     - **What is this app for?**
-#       - This app provides tools for detecting fake news, researching news topics using AI, and interacting with an AI assistant.
-#     - **How does the Fake News Detector work?**
-#       - It uses a machine learning model trained to classify news as real or fake.
-#     - **Can I use voice input for the AI Assistant?**
-#       - Yes! Just click on the "🎤 Use Voice Input" button.
-#     """)
-# AI Assistant (Newzie)
 elif tabs == "🤖 Newzie":
     import queue
     import numpy as np
