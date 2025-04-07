@@ -20,3 +20,4 @@ langchain-google-genai
 lxml
 lxml_html_clean
 scikit-learn
+streamlit-webrtc
